@@ -8,7 +8,7 @@
 
 #include "mem/cache/replacement_policies/base.hh"
 
-struct LRUIPVRPParams; // when you find what the actual name is, make sure to do a cmd + f search in both files for this wrong thing
+struct LRUIPVRPParams;
 
 namespace ReplacementPolicy {
 
@@ -19,14 +19,16 @@ class LRUIPVRP : public Base
     int numWays;
     std::vector<int> promotion_vector;
     uint64_t count; // used when instantiating entries to keep track of how many blocks in the current set we've allocated
+    int64_t set_index;
     std::vector<int>* recency_list_instance; // holds the latest refrence created by instantiateEntry()
   protected:
     struct LRUIPVRP_Repl_Data : ReplacementData{ // Our version of 'TreePLRUReplData'
         // what goes in here?
         // I think this is where I put info that should be associated with each individual cache block
         const uint64_t index;
+        const int64_t set_index;
         std::shared_ptr<std::vector<int>> set_recency_list; // the recency list that corresponds to this cache set
-        LRUIPVRP_Repl_Data(uint64_t index, std::shared_ptr<std::vector<int>> set_recency_list);
+        LRUIPVRP_Repl_Data(uint64_t index, int64_t set_index, std::shared_ptr<std::vector<int>> set_recency_list);
     };
   public:
     typedef LRUIPVRPParams Params;
@@ -38,6 +40,7 @@ class LRUIPVRP : public Base
     void reset(const std::shared_ptr<ReplacementData>& replacement_data) const override;
     ReplaceableEntry* getVictim(const ReplacementCandidates& candidates) const override;
     std::shared_ptr<ReplacementData> instantiateEntry() override;
+    void print_recency_list(const std::vector<int>* lst);
 };
 
 } // namespace ReplacementPolicy
